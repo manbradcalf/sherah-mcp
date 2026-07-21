@@ -7,28 +7,6 @@ import { US_STATE_CODES } from "./data/us-states.js";
 // where inputSchema is a Zod raw shape.
 export function registerTools(server: McpServer): McpServer {
   server.registerTool(
-    "echo",
-    {
-      title: "echo",
-      description: "Repeats the string back to the caller",
-      inputSchema: { input: z.string() },
-    },
-    async ({ input }) => ({ content: [{ type: "text", text: input }] }),
-  );
-
-  server.registerTool(
-    "ping",
-    {
-      title: "ping",
-      description: "Replies pong with an optional message",
-      inputSchema: { msg: z.string().optional() },
-    },
-    async ({ msg }) => ({
-      content: [{ type: "text", text: `pong ${msg ?? ""}`.trim() }],
-    }),
-  );
-
-  server.registerTool(
     "request_sign_up_with_task",
     {
       title: "Request sign up with task",
@@ -37,9 +15,7 @@ export function registerTools(server: McpServer): McpServer {
         "requester's contact and location details.",
       inputSchema: {
         task: z.string().describe("What do you need done?"),
-        neededBy: z.coerce
-          .date()
-          .describe("When do you need it done by?"),
+        neededBy: z.coerce.date().describe("When do you need it done by?"),
         email: z.string().email(),
         city: z.string(),
         state: z.enum(US_STATE_CODES).describe("US state (two-letter code)"),
