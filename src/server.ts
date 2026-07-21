@@ -8,6 +8,7 @@ import { StreamableHTTPServerTransport } from "@modelcontextprotocol/sdk/server/
 import { hostHeaderValidation } from "@modelcontextprotocol/sdk/server/middleware/hostHeaderValidation.js";
 import { isInitializeRequest } from "@modelcontextprotocol/sdk/types.js";
 import { registerTools } from "./tools.js";
+import { registerResources } from "./resources.js";
 import { config } from "./config.js";
 import { publicCors } from "./cors.js";
 import { buildRootSummary, buildServerCard } from "./discovery.js";
@@ -55,6 +56,7 @@ function buildServer(): McpServer {
     },
     { instructions: config.instructions },
   );
+  registerResources(server);
   return registerTools(server);
 }
 

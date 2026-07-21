@@ -1,6 +1,5 @@
 import { McpServer } from "@modelcontextprotocol/sdk/server/mcp.js";
 import z from "zod";
-import { TASKS_WE_HELP_WITH } from "./data/tasks.js";
 import { US_STATE_CODES } from "./data/us-states.js";
 
 // Demo tools. Replace these in your fork — the registration pattern is
@@ -26,22 +25,6 @@ export function registerTools(server: McpServer): McpServer {
     },
     async ({ msg }) => ({
       content: [{ type: "text", text: `pong ${msg ?? ""}`.trim() }],
-    }),
-  );
-
-  server.registerTool(
-    "list_available_tasks",
-    {
-      title: "List available tasks",
-      description:
-        "Returns the categories of tasks Sherah helps with, sourced from " +
-        "https://www.mysherah.com/tasks-we-help-with",
-      inputSchema: {},
-    },
-    async () => ({
-      content: [
-        { type: "text", text: JSON.stringify(TASKS_WE_HELP_WITH, null, 2) },
-      ],
     }),
   );
 
