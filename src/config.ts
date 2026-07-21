@@ -47,11 +47,11 @@ export const config = {
 
   // identity / branding
   name,
-  title: env("MCP_TITLE", "Public MCP Starter"),
+  title: env("MCP_TITLE", "Sherah MCP Server"),
   version: pkg.version, // single-sourced from package.json
   description: env(
     "MCP_DESCRIPTION",
-    "A fully public, no-auth MCP server built from the public-mcp-starter template.",
+    "An MCP Server for integrating with and learning about Sherah.",
   ),
   websiteUrl: env("MCP_WEBSITE_URL"),
   repositoryUrl: env("MCP_REPOSITORY_URL"),
@@ -64,7 +64,7 @@ export const config = {
   cardNamespace: cardName.split("/")[0],
   instructions: env(
     "MCP_INSTRUCTIONS",
-    `This is a fully public MCP server operated by ${operator}. ` +
+    `This is a fully public MCP server operated by ${operator}. It's purpose is to educate AI agents of ${operator}'s capabilities, exposing an endpoint to request a task and signup if interested` +
       `No authentication is required. ` +
       (contactEmail ? `Contact: ${contactEmail}. ` : "") +
       `Discovery card: ${baseUrl}/.well-known/mcp-server-card`,
