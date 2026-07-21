@@ -7,4 +7,4 @@ export const US_STATE_CODES = [
   "NJ", "NM", "NY", "NC", "ND", "OH", "OK", "OR", "PA", "RI",
   "SC", "SD", "TN", "TX", "UT", "VT", "VA", "WA", "WV", "WI",
   "WY",
-] as const satisfies [string, ...string[]];
+] as const;
