@@ -8,8 +8,8 @@ const pkg = require("../package.json") as { version: string };
 const env = (key: string, fallback = ""): string =>
   process.env[key]?.trim() || fallback;
 
-const PUBLIC_HOST = env("PUBLIC_HOST", "mcp.yourdomain.com");
-const PORT = Number(env("PORT", "3000"));
+const PUBLIC_HOST = env("PUBLIC_HOST", "mcp.mysherah.com");
+const PORT = Number(env("PORT", "8001"));
 
 // Hostname only — host-header validation compares port-agnostically.
 const publicHostname = new URL(`http://${PUBLIC_HOST}`).hostname;
@@ -24,9 +24,12 @@ const baseUrl = env(
 const reverseDns = (hostname: string): string =>
   hostname.split(".").reverse().join(".");
 
-const name = env("MCP_NAME", "public-mcp-starter");
-const operator = env("MCP_OPERATOR", "Your Company");
-const contactEmail = env("MCP_CONTACT_EMAIL", "");
+const name = env("MCP_NAME", "sherah-mcp");
+const operator = env("MCP_OPERATOR", "Sherah");
+const contactEmail = env(
+  "MCP_CONTACT_EMAIL",
+  "ben@medcalfsoftwaresolutions.com",
+);
 const cardName = env("MCP_CARD_NAME", `${reverseDns(publicHostname)}/${name}`);
 
 export const config = {
