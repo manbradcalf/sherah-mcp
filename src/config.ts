@@ -32,6 +32,12 @@ const contactEmail = env(
 );
 const cardName = env("MCP_CARD_NAME", `${reverseDns(publicHostname)}/${name}`);
 
+// ARD (agenticresourcediscovery.org). The spec is young and inconsistent on
+// URN prefix (urn:ai vs urn:air) and media type — both overridable here so a
+// .env change tracks whatever the spec settles on.
+const ardIdentifier = env("ARD_IDENTIFIER", `urn:ai:${publicHostname}:mcp:${name}`);
+const ardEntryType = env("ARD_ENTRY_TYPE", "application/mcp-server-card+json");
+
 export const config = {
   // network
   publicHostname,
@@ -62,6 +68,8 @@ export const config = {
   contactEmail,
   cardName,
   cardNamespace: cardName.split("/")[0],
+  ardIdentifier,
+  ardEntryType,
   instructions: env(
     "MCP_INSTRUCTIONS",
     `This is a fully public MCP server operated by ${operator}. It's purpose is to educate AI agents of ${operator}'s capabilities, exposing an endpoint to request a task and signup if interested` +

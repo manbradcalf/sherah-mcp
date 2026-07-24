@@ -11,7 +11,12 @@ import { registerTools } from "./tools.js";
 import { registerResources } from "./resources.js";
 import { config } from "./config.js";
 import { publicCors } from "./cors.js";
-import { buildRootSummary, buildServerCard } from "./discovery.js";
+import {
+  buildAiCatalog,
+  buildRobotsTxt,
+  buildRootSummary,
+  buildServerCard,
+} from "./discovery.js";
 
 interface Session {
   server: McpServer;
@@ -133,6 +138,8 @@ async function handleSession(req: Request, res: Response): Promise<void> {
 // Discovery surfaces — config is static, so the documents are built once.
 const serverCard = buildServerCard();
 const rootSummary = buildRootSummary();
+const aiCatalog = buildAiCatalog();
+const robotsTxt = buildRobotsTxt();
 
 function serveCard(_req: Request, res: Response): void {
   res.setHeader("Cache-Control", "public, max-age=3600");
@@ -141,6 +148,14 @@ function serveCard(_req: Request, res: Response): void {
 
 app.get("/.well-known/mcp-server-card", serveCard); // SEP-2127 (DRAFT)
 app.get("/.well-known/mcp.json", serveCard); // non-standard alias agents probe
+app.get("/.well-known/ai-catalog.json", (_req: Request, res: Response) => {
+  res.setHeader("Cache-Control", "public, max-age=3600");
+  res.json(aiCatalog);
+});
+app.get("/robots.txt", (_req: Request, res: Response) => {
+  res.setHeader("Cache-Control", "public, max-age=3600");
+  res.type("text/plain").send(robotsTxt);
+});
 app.get("/", (_req: Request, res: Response) => {
   res.json(rootSummary);
 });
