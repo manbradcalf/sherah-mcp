@@ -123,6 +123,35 @@ check(
     Boolean(root.json?.mcp?.endpoint),
   `status ${root.res.status}`,
 );
+check(
+  "root summary discovery list includes the ARD catalog",
+  (root.json?.discovery ?? []).includes("/.well-known/ai-catalog.json"),
+  `discovery: ${JSON.stringify(root.json?.discovery)}`,
+);
+
+// ── 3b. ARD catalog (agenticresourcediscovery.org) ─────────────────────
+// Deliberately shape-agnostic: the ARD spec is still in flux, so this only
+// verifies our serving mechanics (route, CORS), never the document's fields.
+const catalog = await get("/.well-known/ai-catalog.json");
+check(
+  "GET /.well-known/ai-catalog.json returns 200 JSON with wildcard CORS",
+  catalog.res.status === 200 &&
+    catalog.json !== null &&
+    catalog.res.headers.get("access-control-allow-origin") === "*",
+  `status ${catalog.res.status}`,
+);
+
+// ── 3c. robots.txt ─────────────────────────────────────────────────────
+const robotsRes = await fetch(`${BASE}/robots.txt`);
+noteStatus(robotsRes.status);
+const robotsText = await robotsRes.text();
+check(
+  "GET /robots.txt returns 200 text/plain referencing the catalog",
+  robotsRes.status === 200 &&
+    (robotsRes.headers.get("content-type") ?? "").includes("text/plain") &&
+    robotsText.includes("/.well-known/ai-catalog.json"),
+  `status ${robotsRes.status}`,
+);
 
 // ── 4. CORS preflight ──────────────────────────────────────────────────
 const preflight = await fetch(`${BASE}/mcp`, { method: "OPTIONS" });
@@ -187,10 +216,8 @@ if (sessionId) {
   );
   const names = (tools.message?.result?.tools ?? []).map((t) => t.name);
   check(
-    "tools/list works with no credentials and includes echo + ping",
-    tools.res.status === 200 &&
-      names.includes("echo") &&
-      names.includes("ping"),
+    "tools/list works with no credentials and includes request_sign_up_with_task",
+    tools.res.status === 200 && names.includes("request_sign_up_with_task"),
     `tools: ${names.join(", ") || "(none)"}`,
   );
 
