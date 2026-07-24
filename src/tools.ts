@@ -1,6 +1,7 @@
 import { McpServer } from "@modelcontextprotocol/sdk/server/mcp.js";
 import z from "zod";
 import { US_STATE_CODES } from "./data/us-states.js";
+import { config } from "./config.js";
 
 // Demo tools. Replace these in your fork — the registration pattern is
 // server.registerTool(name, { title, description, inputSchema }, handler)
@@ -33,7 +34,10 @@ export function registerTools(server: McpServer): McpServer {
         "https://api.mysherah.com/api:3xp2K03g/signup_with_task_requests",
         {
           method: "POST",
-          headers: { "Content-Type": "application/json" },
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${config.xanoAuthToken}`,
+          },
           body: JSON.stringify(submission),
         },
       );

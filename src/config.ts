@@ -68,6 +68,7 @@ export const config = {
   contactEmail,
   cardName,
   cardNamespace: cardName.split("/")[0],
+  xanoAuthToken: env("SHERAH_MCP_XANO_AUTH"),
   ardIdentifier,
   ardEntryType,
   instructions: env(
