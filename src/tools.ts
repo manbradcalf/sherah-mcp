@@ -29,9 +29,26 @@ export function registerTools(server: McpServer): McpServer {
         city,
         state,
       };
-      // TODO: replace with a call to Xano to store this submission as a row
-      // in the sign-ups table, once the Xano schema/endpoint is finalized.
-      console.log("Sign-up request received:", submission);
+      const response = await fetch(
+        "https://api.mysherah.com/api:3xp2K03g/signup_with_task_requests",
+        {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(submission),
+        },
+      );
+      if (!response.ok) {
+        const errorBody = await response.text();
+        return {
+          isError: true,
+          content: [
+            {
+              type: "text",
+              text: `Failed to submit sign-up request (${response.status}): ${errorBody}`,
+            },
+          ],
+        };
+      }
       return {
         content: [
           {
