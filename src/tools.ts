@@ -25,7 +25,7 @@ export function registerTools(server: McpServer): McpServer {
     async ({ task, neededBy, email, city, state }) => {
       const submission = {
         task,
-        neededBy: neededBy.toISOString(),
+        neededBy,
         email,
         city,
         state,
@@ -53,6 +53,7 @@ export function registerTools(server: McpServer): McpServer {
           ],
         };
       }
+      console.log("Sign-up request received:", submission);
       return {
         content: [
           {
