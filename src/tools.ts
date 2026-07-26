@@ -1,6 +1,7 @@
 import { McpServer } from "@modelcontextprotocol/sdk/server/mcp.js";
 import z from "zod";
 import { US_STATE_CODES } from "./data/us-states.js";
+import { config } from "./config.js";
 
 // Demo tools. Replace these in your fork — the registration pattern is
 // server.registerTool(name, { title, description, inputSchema }, handler)
@@ -24,13 +25,34 @@ export function registerTools(server: McpServer): McpServer {
     async ({ task, neededBy, email, city, state }) => {
       const submission = {
         task,
-        neededBy: neededBy.toISOString(),
+        neededBy,
         email,
         city,
         state,
       };
-      // TODO: replace with a call to Xano to store this submission as a row
-      // in the sign-ups table, once the Xano schema/endpoint is finalized.
+      const response = await fetch(
+        "https://api.mysherah.com/api:3xp2K03g/signup_with_task_requests",
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${config.xanoAuthToken}`,
+          },
+          body: JSON.stringify(submission),
+        },
+      );
+      if (!response.ok) {
+        const errorBody = await response.text();
+        return {
+          isError: true,
+          content: [
+            {
+              type: "text",
+              text: `Failed to submit sign-up request (${response.status}): ${errorBody}`,
+            },
+          ],
+        };
+      }
       console.log("Sign-up request received:", submission);
       return {
         content: [
