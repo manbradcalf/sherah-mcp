@@ -68,6 +68,13 @@ export const config = {
   contactEmail,
   cardName,
   cardNamespace: cardName.split("/")[0],
+  // Sign-up intake (Xano). No startup failure when the token is missing — a
+  // fresh fork must still boot and pass smoke tests — the tool instead
+  // rejects submissions until it is set.
+  signupUrl: env(
+    "SHERAH_MCP_SIGNUP_URL",
+    "https://api.mysherah.com/api:3xp2K03g/signup_with_task_requests",
+  ),
   xanoAuthToken: env("SHERAH_MCP_XANO_AUTH"),
   ardIdentifier,
   ardEntryType,

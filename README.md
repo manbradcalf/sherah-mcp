@@ -185,7 +185,12 @@ Everything on this server is **public by design** — treat it accordingly:
   in this template — use an authenticated server instead.
 - Host-header validation is kept (DNS-rebinding mitigation); add hostnames via
   `EXTRA_HOSTS` if you serve under more than one name.
-- Rate-limit at nginx (the example config does).
+- **There is no rate limiting in the app** — every route (including
+  state-changing tools) is open to anonymous callers with no throttling in
+  Express. Abuse protection is handled entirely at nginx via `limit_req` (see
+  `deploy/nginx.conf.example` and Production deployment below). If you deploy
+  without nginx or another rate-limiting reverse proxy in front, this server
+  has **no** protection against being hammered.
 - Sessions live in an in-memory `Map` with no idle eviction — fine for
   lightweight billboard tools; add a sweep if your tools get heavier.
 - If you find yourself wanting auth, this is the wrong starting point.
