@@ -40,12 +40,17 @@ export function registerTools(server: McpServer): McpServer {
           .describe("What do you need done?"),
         // A calendar date, not an instant — coercing to a Date forced a
         // timezone the caller never gave us, landing UTC midnight on the
-        // previous local day. Passed through to Xano unconverted.
+        // previous local day. Xano stores this as a plain date column, the
+        // same type as tasks.due_date, so the string goes through unconverted.
+        // The calling model knows today's date and the user's context; this
+        // server knows neither, so relative dates get resolved on that side.
         neededBy: z
           .string()
-          .date()
+          .date("Expected a calendar date as YYYY-MM-DD, for example 2026-08-01")
           .describe(
-            "When do you need it done by? Calendar date as YYYY-MM-DD.",
+            "When do you need it done by? A calendar date as YYYY-MM-DD, " +
+              "e.g. 2026-08-01. Resolve relative dates like 'next Tuesday' " +
+              "yourself before calling. No time and no timezone.",
           ),
         email: z.string().email(),
         city: z.string().min(1).max(MAX_CITY_LENGTH),
