@@ -78,6 +78,40 @@ rate-limiting reverse proxy) in front, there is *no* protection against
 someone hammering the signup endpoint. The app should never be exposed
 directly to the internet on its own.
 
+## The sign-up tools send mail to an address a stranger chose
+
+Both `request_sign_up` and `request_sign_up_with_task` take an `email` from an
+anonymous caller and cause mail to be sent to it, from Sherah's domain,
+DKIM-signed. That is an open relay in the shape that matters: the recipient
+never asked for the message, and the sender looks legitimate.
+
+Two halves to the problem, and this repo only closes one of them.
+
+**Caller-authored content in the email** — closed, for `request_sign_up`, by
+construction. Its input schema is `email` and nothing else, so there is no
+free-text field an LLM could fill with content that arrives wearing Sherah's
+brand. `scripts/smoke.mjs` asserts the schema stays email-only; if someone adds
+a field later, that check fails rather than silently reopening the hole.
+`request_sign_up_with_task` *does* take free text (`task`, `city`) — those are
+length-capped and control-character-stripped in `src/tools.ts`, which stops
+header injection but is not a licence to render them into an email body. See
+issue #19 for where that text may and may not appear.
+
+**Volume aimed at one victim** — *not* closed here. Nothing in this repo limits
+how many times a given address can be submitted. The nginx limit
+(`deploy/nginx.conf.example`) keys on `$binary_remote_addr`, which is the wrong
+dimension: 10r/s pointed at a single mailbox sits entirely inside the budget,
+from one IP, and proxy rotation defeats per-IP keying anyway. The controls that
+actually bound it live in Xano — at most one pending unconfirmed request per
+address, and a resend cooldown per address so the millionth submission produces
+zero emails. **Until those exist upstream, `request_sign_up` is an email-bombing
+primitive.** Treat the Xano-side checklist in issue #19 as a prerequisite for
+exposing it, not a follow-up.
+
+The tool's success message is also deliberately identical whether the address
+is new, already pending, or in cooldown — otherwise it becomes an oracle for
+which addresses are registered with Sherah.
+
 ## What's intentionally *not* protected
 
 Because the whole point of this server is to be a discoverable, anonymous
@@ -87,7 +121,9 @@ front door:
   private data, or side effects a stranger shouldn't be able to trigger.
 - No per-caller throttling or abuse scoring beyond nginx's IP-based rate
   limit — a determined abuser with many IPs could still submit many signup
-  requests. There's no CAPTCHA or similar in front of the tool.
+  requests. There's no CAPTCHA or similar in front of the tools.
+- No per-*destination* limit on sign-up emails, which is the dimension that
+  actually matters — see the section above.
 - Sessions live in an in-memory `Map` with no idle eviction (fine for a
   lightweight billboard; would need a sweep if tools got heavier).
 

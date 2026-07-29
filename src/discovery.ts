@@ -64,7 +64,11 @@ const REPRESENTATIVE_QUERIES = [
 ];
 
 // Update when tools (src/tools.ts) or resources (src/resources.ts) change.
-const CAPABILITIES = ["request_sign_up_with_task", "tasks-we-help-with"];
+const CAPABILITIES = [
+  "request_sign_up",
+  "request_sign_up_with_task",
+  "tasks-we-help-with",
+];
 
 // "Admin & Organization" -> "admin-organization"
 const slug = (s: string): string =>

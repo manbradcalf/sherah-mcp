@@ -165,7 +165,7 @@ app.get("/mcp", handleSession);
 app.delete("/mcp", handleSession);
 if (!config.xanoAuthToken) {
   console.warn(
-    "SHERAH_MCP_XANO_AUTH is not set — request_sign_up_with_task will reject submissions",
+    "SHERAH_MCP_XANO_AUTH is not set — request_sign_up and request_sign_up_with_task will reject submissions",
   );
 }
 app.listen(config.port, config.bindAddr, () =>

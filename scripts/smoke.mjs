@@ -216,9 +216,23 @@ if (sessionId) {
   );
   const names = (tools.message?.result?.tools ?? []).map((t) => t.name);
   check(
-    "tools/list works with no credentials and includes request_sign_up_with_task",
-    tools.res.status === 200 && names.includes("request_sign_up_with_task"),
+    "tools/list works with no credentials and includes both sign-up tools",
+    tools.res.status === 200 &&
+      names.includes("request_sign_up") &&
+      names.includes("request_sign_up_with_task"),
     `tools: ${names.join(", ") || "(none)"}`,
+  );
+
+  // request_sign_up's whole safety argument is that a caller can't put text
+  // into the confirmation email — so assert the schema really is email-only.
+  const signUp = (tools.message?.result?.tools ?? []).find(
+    (t) => t.name === "request_sign_up",
+  );
+  const signUpProps = Object.keys(signUp?.inputSchema?.properties ?? {});
+  check(
+    "request_sign_up accepts email and nothing else",
+    signUpProps.length === 1 && signUpProps[0] === "email",
+    `properties: ${signUpProps.join(", ") || "(none)"}`,
   );
 
   const del = await fetch(`${BASE}/mcp`, {

@@ -22,7 +22,7 @@ agent ──HTTPS──▶ nginx ──▶ Express (host check) ──▶ MCP St
 - Fleshed-out `initialize` response: `serverInfo` (name, title, version, description, websiteUrl, icons) + `instructions`
 - Wildcard CORS so browser-based agents can connect
 - Sessioned Streamable HTTP transport (`@modelcontextprotocol/sdk`), host-header validation against DNS rebinding
-- Two demo tools (`echo`, `ping`) showing the `registerTool` + Zod pattern
+- Two sign-up tools — `request_sign_up` (email only) and `request_sign_up_with_task` — showing the `registerTool` + Zod pattern
 - `npm run smoke` — end-to-end no-auth + discovery verification
 
 ## Requirements
@@ -203,7 +203,7 @@ src/
   config.ts      ALL env-var reads — the single rebranding surface
   discovery.ts   server card + root summary builders
   cors.ts        wildcard CORS middleware
-  tools.ts       demo tools (echo, ping)
+  tools.ts       sign-up intake tools (Xano-backed)
 scripts/
   smoke.mjs      no-auth + discovery verification
 deploy/
