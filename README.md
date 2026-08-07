@@ -22,7 +22,7 @@ agent ──HTTPS──▶ nginx ──▶ Express (host check) ──▶ MCP St
 - Fleshed-out `initialize` response: `serverInfo` (name, title, version, description, websiteUrl, icons) + `instructions`
 - Wildcard CORS so browser-based agents can connect
 - Sessioned Streamable HTTP transport (`@modelcontextprotocol/sdk`), host-header validation against DNS rebinding
-- Two sign-up tools — `request_sign_up` (email only) and `request_sign_up_with_task` — showing the `registerTool` + Zod pattern
+- Two sign-up tools — `request_sign_up` (email, city, state) and `request_sign_up_with_task` — showing the `registerTool` + Zod pattern
 - `npm run smoke` — end-to-end no-auth + discovery verification
 
 ## Requirements

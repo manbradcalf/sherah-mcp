@@ -85,17 +85,28 @@ anonymous caller and cause mail to be sent to it, from Sherah's domain,
 DKIM-signed. That is an open relay in the shape that matters: the recipient
 never asked for the message, and the sender looks legitimate.
 
-Two halves to the problem, and this repo only closes one of them.
+Two halves to the problem, and this repo now closes neither outright.
 
-**Caller-authored content in the email** — closed, for `request_sign_up`, by
-construction. Its input schema is `email` and nothing else, so there is no
-free-text field an LLM could fill with content that arrives wearing Sherah's
-brand. `scripts/smoke.mjs` asserts the schema stays email-only; if someone adds
-a field later, that check fails rather than silently reopening the hole.
-`request_sign_up_with_task` *does* take free text (`task`, `city`) — those are
-length-capped and control-character-stripped in `src/tools.ts`, which stops
-header injection but is not a licence to render them into an email body. See
-issue #19 for where that text may and may not appear.
+**Caller-authored content in the email** — no longer closed by construction.
+`request_sign_up` once took `email` and nothing else, which meant no free-text
+field existed for an LLM to fill with content arriving under Sherah's brand.
+It now also takes `city` (free text) and `state` (a 51-value enum, so not
+caller-authored in any useful sense). Both tools therefore carry caller-written
+text: `task` and `city` on `request_sign_up_with_task`, `city` on
+`request_sign_up`. Every free-text field is length-capped and
+control-character-stripped in `src/tools.ts`, which stops header injection but
+is *not* a licence to render them into an email body.
+
+What protects the brand is now a contract with Xano rather than a property of
+the schema: the confirmation email must be fixed copy plus a tokenized link,
+with no submitted field interpolated into it. See issue #19 for where that text
+may and may not appear.
+
+`scripts/smoke.mjs` pins the exact field set (`email`, `city`, `state`) with
+`additionalProperties: false`, and asserts `city` stays length-capped and
+`state` stays an enum — so a *new* free-text field fails the run rather than
+silently widening the surface. That check bounds the schema; it can no longer
+prove the tool is text-free, because it isn't.
 
 **Volume aimed at one victim** — *not* closed here. Nothing in this repo limits
 how many times a given address can be submitted. The nginx limit
