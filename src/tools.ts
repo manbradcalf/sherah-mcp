@@ -74,21 +74,7 @@ async function postToIntake(
   return null;
 }
 
-// Demo tools. Replace these in your fork — the registration pattern is
-// server.registerTool(name, { title, description, inputSchema }, handler)
-// where inputSchema is a Zod raw shape.
 export function registerTools(server: McpServer): McpServer {
-  // Interest-only intake. The deliberate design here is that `email` is the
-  // *whole* input: nothing a caller writes can reach the confirmation email,
-  // so what goes out over Sherah's DKIM signature is fixed copy plus a
-  // tokenized link. That closes the brand-trust-laundering half of issue #19
-  // by construction rather than by escaping.
-  //
-  // It does not close the email-bombing half. This tool will mail any address
-  // an anonymous caller names, and nginx's per-IP limit is the wrong shape for
-  // a per-destination problem. The controls that actually bound it — one
-  // pending unconfirmed request per address, and a resend cooldown per address
-  // — live in Xano, upstream of here. Nothing in this repo enforces them.
   server.registerTool(
     "request_sign_up",
     {
@@ -101,25 +87,20 @@ export function registerTools(server: McpServer): McpServer {
         "If they have a concrete task in mind, use request_sign_up_with_task " +
         "instead.",
       inputSchema: {
-        email: z
-          .string()
-          .email()
-          .describe(
-            "The email address of the person being signed up. They receive " +
-              "a confirmation link at this address.",
-          ),
+        email: z.string().email(),
+        city: z.string().min(1).max(MAX_CITY_LENGTH),
+        state: z.enum(US_STATE_CODES).describe("US state (two-letter code)"),
       },
     },
-    async ({ email }) => {
+    async ({ email, city, state }) => {
+      const submission = { email, city: singleLine(city), state }
+
       const failure = await postToIntake(
         "request_sign_up",
         config.signupRequestEndpoint,
-        { email },
+        submission
       );
       if (failure) return failure;
-      // Deliberately identical whatever Xano did with it — a "we already have
-      // that address" or "still in cooldown" reply here would turn the tool
-      // into an oracle for which addresses are already registered.
       return textResult(
         `Thanks! We've emailed ${email} a link asking them to confirm they want to ` +
           "sign up for Sherah. Nothing further happens until they click it — let them " +
@@ -141,12 +122,6 @@ export function registerTools(server: McpServer): McpServer {
           .min(1)
           .max(MAX_TASK_LENGTH)
           .describe("What do you need done?"),
-        // A calendar date, not an instant — coercing to a Date forced a
-        // timezone the caller never gave us, landing UTC midnight on the
-        // previous local day. Xano stores this as a plain date column, the
-        // same type as tasks.due_date, so the string goes through unconverted.
-        // The calling model knows today's date and the user's context; this
-        // server knows neither, so relative dates get resolved on that side.
         neededBy: z
           .string()
           .date("Expected a calendar date as YYYY-MM-DD, for example 2026-08-01")
@@ -171,9 +146,6 @@ export function registerTools(server: McpServer): McpServer {
         city: singleLine(city),
         state,
       };
-      if (!submission.task || !submission.city) {
-        return errorResult("Both task and city must contain readable text.");
-      }
       const failure = await postToIntake(
         "request_sign_up_with_task",
         config.signupWithTaskRequestEndpoint,

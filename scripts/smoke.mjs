@@ -223,16 +223,30 @@ if (sessionId) {
     `tools: ${names.join(", ") || "(none)"}`,
   );
 
-  // request_sign_up's whole safety argument is that a caller can't put text
-  // into the confirmation email — so assert the schema really is email-only.
   const signUp = (tools.message?.result?.tools ?? []).find(
     (t) => t.name === "request_sign_up",
   );
-  const signUpProps = Object.keys(signUp?.inputSchema?.properties ?? {});
+  const signUpSchema = signUp?.inputSchema ?? {};
+  const signUpFields = signUpSchema.properties ?? {};
+  const signUpProps = Object.keys(signUpFields);
   check(
-    "request_sign_up accepts email and nothing else",
-    signUpProps.length === 1 && signUpProps[0] === "email",
-    `properties: ${signUpProps.join(", ") || "(none)"}`,
+    "request_sign_up accepts email, city, state and nothing else",
+    signUpProps.length === 3 &&
+      ["email", "city", "state"].every((p) => signUpProps.includes(p)) &&
+      signUpSchema.additionalProperties === false,
+    `properties: ${signUpProps.join(", ") || "(none)"}, ` +
+      `additionalProperties: ${signUpSchema.additionalProperties}`,
+  );
+
+  check(
+    "request_sign_up's fields stay constrained: email format, capped city, enum state",
+    signUpFields.email?.format === "email" &&
+      typeof signUpFields.city?.maxLength === "number" &&
+      Array.isArray(signUpFields.state?.enum) &&
+      signUpFields.state.enum.length > 0,
+    `email format: ${signUpFields.email?.format ?? "(none)"}, ` +
+      `city maxLength: ${signUpFields.city?.maxLength ?? "(none)"}, ` +
+      `state enum: ${signUpFields.state?.enum?.length ?? 0} values`,
   );
 
   const del = await fetch(`${BASE}/mcp`, {
