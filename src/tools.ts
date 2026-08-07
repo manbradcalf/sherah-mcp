@@ -93,12 +93,12 @@ export function registerTools(server: McpServer): McpServer {
       },
     },
     async ({ email, city, state }) => {
-      const submission = { email, city: singleLine(city), state }
+      const submission = { email, city: singleLine(city), state };
 
       const failure = await postToIntake(
         "request_sign_up",
         config.signupRequestEndpoint,
-        submission
+        submission,
       );
       if (failure) return failure;
       return textResult(
