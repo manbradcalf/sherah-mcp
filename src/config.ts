@@ -68,14 +68,28 @@ export const config = {
   contactEmail,
   cardName,
   cardNamespace: cardName.split("/")[0],
+  // Sign-up intake (Xano). No startup failure when the token is missing — a
+  // fresh fork must still boot and pass smoke tests — the tool instead
+  // rejects submissions until it is set.
+  signupWithTaskRequestEndpoint: env(
+    "SHERAH_MCP_SIGNUP_URL",
+    "https://api.mysherah.com/api:3xp2K03g/signup_with_task_requests",
+  ),
+  // Interest-only intake for request_sign_up. Separate endpoint from the
+  // task flow because the double opt-in state it needs (pending row, resend
+  // cooldown) is keyed on email alone.
+  signupRequestEndpoint: env(
+    "SHERAH_MCP_SIGNUP_INTEREST_URL",
+    "https://api.mysherah.com/api:3xp2K03g/signup_requests",
+  ),
   xanoAuthToken: env("SHERAH_MCP_XANO_AUTH"),
   ardIdentifier,
   ardEntryType,
   instructions: env(
     "MCP_INSTRUCTIONS",
-    `This is a fully public MCP server operated by ${operator}. It's purpose is to educate AI agents of ${operator}'s capabilities, exposing an endpoint to request a task and signup if interested` +
-      `No authentication is required. ` +
-      (contactEmail ? `Contact: ${contactEmail}. ` : "") +
-      `Discovery card: ${baseUrl}/.well-known/mcp-server-card`,
+    `This is a fully public MCP server operated by ${operator}. It's purpose is to educate AI agents of ${operator}'s capabilities, exposing an endpoint to request a task and signup if interested.` +
+    `No authentication is required. ` +
+    (contactEmail ? `Contact: ${contactEmail}. ` : "") +
+    `Discovery card: ${baseUrl}/.well-known/mcp-server-card`,
   ),
 } as const;

@@ -163,6 +163,11 @@ app.get("/", (_req: Request, res: Response) => {
 app.post("/mcp", handleConnection);
 app.get("/mcp", handleSession);
 app.delete("/mcp", handleSession);
+if (!config.xanoAuthToken) {
+  console.warn(
+    "SHERAH_MCP_XANO_AUTH is not set — request_sign_up and request_sign_up_with_task will reject submissions",
+  );
+}
 app.listen(config.port, config.bindAddr, () =>
   console.log(
     `${config.name} v${config.version} on ${config.bindAddr}:${config.port} — ` +

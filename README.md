@@ -22,7 +22,7 @@ agent ──HTTPS──▶ nginx ──▶ Express (host check) ──▶ MCP St
 - Fleshed-out `initialize` response: `serverInfo` (name, title, version, description, websiteUrl, icons) + `instructions`
 - Wildcard CORS so browser-based agents can connect
 - Sessioned Streamable HTTP transport (`@modelcontextprotocol/sdk`), host-header validation against DNS rebinding
-- Two demo tools (`echo`, `ping`) showing the `registerTool` + Zod pattern
+- Two sign-up tools — `request_sign_up` (email, city, state) and `request_sign_up_with_task` — showing the `registerTool` + Zod pattern
 - `npm run smoke` — end-to-end no-auth + discovery verification
 
 ## Requirements
@@ -185,7 +185,12 @@ Everything on this server is **public by design** — treat it accordingly:
   in this template — use an authenticated server instead.
 - Host-header validation is kept (DNS-rebinding mitigation); add hostnames via
   `EXTRA_HOSTS` if you serve under more than one name.
-- Rate-limit at nginx (the example config does).
+- **There is no rate limiting in the app** — every route (including
+  state-changing tools) is open to anonymous callers with no throttling in
+  Express. Abuse protection is handled entirely at nginx via `limit_req` (see
+  `deploy/nginx.conf.example` and Production deployment below). If you deploy
+  without nginx or another rate-limiting reverse proxy in front, this server
+  has **no** protection against being hammered.
 - Sessions live in an in-memory `Map` with no idle eviction — fine for
   lightweight billboard tools; add a sweep if your tools get heavier.
 - If you find yourself wanting auth, this is the wrong starting point.
@@ -198,7 +203,7 @@ src/
   config.ts      ALL env-var reads — the single rebranding surface
   discovery.ts   server card + root summary builders
   cors.ts        wildcard CORS middleware
-  tools.ts       demo tools (echo, ping)
+  tools.ts       sign-up intake tools (Xano-backed)
 scripts/
   smoke.mjs      no-auth + discovery verification
 deploy/
