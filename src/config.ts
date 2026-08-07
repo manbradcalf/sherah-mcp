@@ -71,14 +71,14 @@ export const config = {
   // Sign-up intake (Xano). No startup failure when the token is missing — a
   // fresh fork must still boot and pass smoke tests — the tool instead
   // rejects submissions until it is set.
-  signupUrl: env(
+  signupWithTaskRequestEndpoint: env(
     "SHERAH_MCP_SIGNUP_URL",
     "https://api.mysherah.com/api:3xp2K03g/signup_with_task_requests",
   ),
   // Interest-only intake for request_sign_up. Separate endpoint from the
   // task flow because the double opt-in state it needs (pending row, resend
   // cooldown) is keyed on email alone.
-  signupInterestUrl: env(
+  signupRequestEndpoint: env(
     "SHERAH_MCP_SIGNUP_INTEREST_URL",
     "https://api.mysherah.com/api:3xp2K03g/signup_requests",
   ),

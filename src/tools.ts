@@ -113,7 +113,7 @@ export function registerTools(server: McpServer): McpServer {
     async ({ email }) => {
       const failure = await postToIntake(
         "request_sign_up",
-        config.signupInterestUrl,
+        config.signupRequestEndpoint,
         { email },
       );
       if (failure) return failure;
@@ -176,7 +176,7 @@ export function registerTools(server: McpServer): McpServer {
       }
       const failure = await postToIntake(
         "request_sign_up_with_task",
-        config.signupUrl,
+        config.signupWithTaskRequestEndpoint,
         submission,
       );
       if (failure) return failure;
