@@ -103,8 +103,8 @@ export function registerTools(server: McpServer): McpServer {
       if (failure) return failure;
       return textResult(
         `Thanks! We've emailed ${email} a link asking them to confirm they want to ` +
-          "sign up for Sherah. Nothing further happens until they click it — let them " +
-          "know to check their inbox, and don't re-submit if they haven't yet.",
+        "sign up for Sherah. Nothing further happens until they click it — let them " +
+        "know to check their inbox, and don't re-submit if they haven't yet.",
       );
     },
   );
@@ -127,8 +127,8 @@ export function registerTools(server: McpServer): McpServer {
           .date("Expected a calendar date as YYYY-MM-DD, for example 2026-08-01")
           .describe(
             "When do you need it done by? A calendar date as YYYY-MM-DD, " +
-              "e.g. 2026-08-01. Resolve relative dates like 'next Tuesday' " +
-              "yourself before calling. No time and no timezone.",
+            "e.g. 2026-08-01. Resolve relative dates like 'next Tuesday' " +
+            "yourself before calling. No time and no timezone.",
           ),
         email: z.string().email(),
         city: z.string().min(1).max(MAX_CITY_LENGTH),
@@ -157,7 +157,7 @@ export function registerTools(server: McpServer): McpServer {
       // endpoint. Changing it early would promise an email that never arrives.
       return textResult(
         "Thanks! We received your request:\n" +
-          JSON.stringify(submission, null, 2),
+        JSON.stringify(submission, null, 2),
       );
     },
   );

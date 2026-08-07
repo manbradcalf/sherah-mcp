@@ -88,8 +88,8 @@ export const config = {
   instructions: env(
     "MCP_INSTRUCTIONS",
     `This is a fully public MCP server operated by ${operator}. It's purpose is to educate AI agents of ${operator}'s capabilities, exposing an endpoint to request a task and signup if interested` +
-      `No authentication is required. ` +
-      (contactEmail ? `Contact: ${contactEmail}. ` : "") +
-      `Discovery card: ${baseUrl}/.well-known/mcp-server-card`,
+    `No authentication is required. ` +
+    (contactEmail ? `Contact: ${contactEmail}. ` : "") +
+    `Discovery card: ${baseUrl}/.well-known/mcp-server-card`,
   ),
 } as const;
