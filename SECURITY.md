@@ -35,7 +35,7 @@ connections above, and in the MCP tool result handed back to the calling agent.
 
 Two error paths do log, deliberately (`src/tools.ts`):
 
-- An upstream non-2xx logs Xano's **response body** via `console.error`. The
+- A non-2xx from Xano logs its **response body** via `console.error`. The
   caller is anonymous, so error detail stays server-side rather than being
   echoed back — the tool returns only a status code. Xano's error bodies
   shouldn't contain submitted fields, but that's Xano's contract, not a
@@ -104,7 +104,7 @@ dimension: 10r/s pointed at a single mailbox sits entirely inside the budget,
 from one IP, and proxy rotation defeats per-IP keying anyway. The controls that
 actually bound it live in Xano — at most one pending unconfirmed request per
 address, and a resend cooldown per address so the millionth submission produces
-zero emails. **Until those exist upstream, `request_sign_up` is an email-bombing
+zero emails. **Until those exist in Xano, `request_sign_up` is an email-bombing
 primitive.** Treat the Xano-side checklist in issue #19 as a prerequisite for
 exposing it, not a follow-up.
 

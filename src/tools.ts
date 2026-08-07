@@ -30,9 +30,9 @@ const textResult = (text: string) => ({
   content: [{ type: "text" as const, text }],
 });
 
-// Shared upstream leg for the intake tools. Returns an error result to hand
+// Shared Xano leg for the intake tools. Returns an error result to hand
 // straight back to the caller, or null when Xano accepted the submission.
-// Callers are anonymous, so upstream detail stays in the server log — the
+// Callers are anonymous, so Xano's error detail stays in the server log — the
 // tool result never carries more than a status code.
 async function postToIntake(
   toolName: string,
@@ -57,18 +57,18 @@ async function postToIntake(
       signal: AbortSignal.timeout(10_000),
     });
   } catch (err) {
-    console.error(`${toolName} upstream call failed:`, err);
+    console.error(`${toolName} Xano call failed:`, err);
     return errorResult(
       "Failed to submit sign-up request: the sign-up service is unreachable. Please try again later.",
     );
   }
   if (!response.ok) {
     console.error(
-      `${toolName} upstream error ${response.status}:`,
+      `${toolName} Xano error ${response.status}:`,
       await response.text(),
     );
     return errorResult(
-      `Failed to submit sign-up request (upstream error ${response.status}). Please try again later.`,
+      `Failed to submit sign-up request (sign-up service error ${response.status}). Please try again later.`,
     );
   }
   return null;
@@ -138,7 +138,7 @@ export function registerTools(server: McpServer): McpServer {
     async ({ task, neededBy, email, city, state }) => {
       // Sanitize after validation, not in the schema: a Zod transform would
       // muddy the JSON Schema the tool advertises, and this keeps what goes
-      // upstream visible at the call site.
+      // to Xano visible at the call site.
       const submission = {
         task: singleLine(task),
         neededBy,
