@@ -1,4 +1,5 @@
-// tasks.ts — raw data behind the `list_available_tasks` tool.
+// tasks.ts — raw data behind the `tasks-we-help-with` resource and the
+// `get_available_task_types` tool.
 // Sourced from https://www.mysherah.com/tasks-we-help-with — update this
 // file (not tools.ts) when the site's task list changes.
 export const TASKS_WE_HELP_WITH = {

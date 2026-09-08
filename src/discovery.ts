@@ -65,6 +65,7 @@ const REPRESENTATIVE_QUERIES = [
 
 // Update when tools (src/tools.ts) or resources (src/resources.ts) change.
 const CAPABILITIES = [
+  "get_available_task_types",
   "request_sign_up",
   "request_sign_up_with_task",
   "tasks-we-help-with",

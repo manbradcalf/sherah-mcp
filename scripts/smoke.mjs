@@ -216,11 +216,35 @@ if (sessionId) {
   );
   const names = (tools.message?.result?.tools ?? []).map((t) => t.name);
   check(
-    "tools/list works with no credentials and includes both sign-up tools",
+    "tools/list works with no credentials and includes the sign-up and task-type tools",
     tools.res.status === 200 &&
     names.includes("request_sign_up") &&
-    names.includes("request_sign_up_with_task"),
+    names.includes("request_sign_up_with_task") &&
+    names.includes("get_available_task_types"),
     `tools: ${names.join(", ") || "(none)"}`,
+  );
+
+  const taskTypes = await rpc(
+    {
+      jsonrpc: "2.0",
+      id: 3,
+      method: "tools/call",
+      params: { name: "get_available_task_types", arguments: {} },
+    },
+    sessionId,
+  );
+  let taskTypeCategories = [];
+  try {
+    taskTypeCategories =
+      JSON.parse(taskTypes.message?.result?.content?.[0]?.text ?? "{}")
+        .categories ?? [];
+  } catch {}
+  check(
+    "get_available_task_types returns the task category JSON",
+    taskTypes.res.status === 200 &&
+    !taskTypes.message?.result?.isError &&
+    taskTypeCategories.length > 0,
+    `${taskTypeCategories.length} categories`,
   );
 
   const signUp = (tools.message?.result?.tools ?? []).find(

@@ -1,6 +1,7 @@
 import { McpServer } from "@modelcontextprotocol/sdk/server/mcp.js";
 import z from "zod";
 import { US_STATE_CODES } from "./data/us-states.js";
+import { TASKS_WE_HELP_WITH } from "./data/tasks.js";
 import { config } from "./config.js";
 
 // Free-text fields on a public, unauthenticated tool are attacker-controlled:
@@ -75,6 +76,25 @@ async function postToIntake(
 }
 
 export function registerTools(server: McpServer): McpServer {
+  // Same payload as the `tasks-we-help-with` resource. Exposed as a tool too
+  // because some clients (ChatGPT among them) only surface tools, never
+  // resources, so without this they can't see what Sherah does.
+  server.registerTool(
+    "get_available_task_types",
+    {
+      title: "Get available task types",
+      description:
+        "Returns the categories of tasks Sherah helps with (indoor and " +
+        "outdoor home, admin, kids, pets, meals, travel, shopping, finances, " +
+        "and more) with example tasks under each. Call this to check whether " +
+        "a request is something Sherah does, or to describe Sherah's services, " +
+        "before using request_sign_up_with_task.",
+      inputSchema: {},
+      annotations: { readOnlyHint: true, idempotentHint: true },
+    },
+    async () => textResult(JSON.stringify(TASKS_WE_HELP_WITH, null, 2)),
+  );
+
   server.registerTool(
     "request_sign_up",
     {
@@ -115,8 +135,9 @@ export function registerTools(server: McpServer): McpServer {
       title: "Request sign up with task",
       description:
         "Submits a request for Sherah to help with a task, along with the " +
-        "requester's contact and location details." +
-        "To learn more about the kinds of tasks Sherah can help with, see this MCP server's resources",
+        "requester's contact and location details. To learn what kinds of " +
+        "tasks Sherah can help with, call get_available_task_types first " +
+        "(or read this server's tasks-we-help-with resource).",
       inputSchema: {
         task: z
           .string()

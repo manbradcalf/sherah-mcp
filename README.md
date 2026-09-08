@@ -23,6 +23,7 @@ agent ──HTTPS──▶ nginx ──▶ Express (host check) ──▶ MCP St
 - Wildcard CORS so browser-based agents can connect
 - Sessioned Streamable HTTP transport (`@modelcontextprotocol/sdk`), host-header validation against DNS rebinding
 - Two sign-up tools — `request_sign_up` (email, city, state) and `request_sign_up_with_task` — showing the `registerTool` + Zod pattern
+- `get_available_task_types` tool — same JSON as the `tasks-we-help-with` resource, for clients (e.g. ChatGPT) that can call tools but not read resources
 - `npm run smoke` — end-to-end no-auth + discovery verification
 
 ## Requirements
