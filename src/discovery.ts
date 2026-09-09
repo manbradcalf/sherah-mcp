@@ -11,7 +11,7 @@ export function buildServerCard(): Record<string, unknown> {
   const card: Record<string, unknown> = {
     $schema:
       "https://static.modelcontextprotocol.io/schemas/2025-12-11/server.schema.json",
-    name: config.cardName, // reverse-DNS, e.g. "com.example.mcp/public-mcp-starter"
+    name: config.cardName, // reverse-DNS of the apex domain, e.g. "com.example/public-mcp-starter"
     version: config.version,
     description: config.description,
     title: config.title,

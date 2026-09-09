@@ -20,17 +20,40 @@ const baseUrl = env(
   isLocal ? `http://${publicHostname}:${PORT}` : `https://${publicHostname}`,
 );
 
-// "mcp.example.com" -> "com.example.mcp"
+// "mcp.example.com" -> "example.com". Assumes a two-label registrable domain;
+// set MCP_CARD_NAME explicitly for hosts like example.co.uk.
+const apexDomain = (hostname: string): string =>
+  hostname.split(".").slice(-2).join(".");
+
+// "example.com" -> "com.example"
 const reverseDns = (hostname: string): string =>
   hostname.split(".").reverse().join(".");
 
-const name = env("MCP_NAME", "sherah-mcp");
+const name = env("MCP_NAME", "sherah");
 const operator = env("MCP_OPERATOR", "Sherah");
 const contactEmail = env(
   "MCP_CONTACT_EMAIL",
   "ben@medcalfsoftwaresolutions.com",
 );
-const cardName = env("MCP_CARD_NAME", `${reverseDns(publicHostname)}/${name}`);
+// Registry-style name. The namespace is the reverse-DNS of the apex domain
+// (the one DNS ownership is proven against when publishing to the MCP
+// Registry), not of the MCP host itself.
+const cardName = env(
+  "MCP_CARD_NAME",
+  `${reverseDns(apexDomain(publicHostname))}/${name}`,
+);
+
+// The MCP Registry caps title and description at 100 characters.
+const REGISTRY_TEXT_MAX = 100;
+const registryText = (key: string, fallback: string): string => {
+  const value = env(key, fallback);
+  if (value.length > REGISTRY_TEXT_MAX) {
+    console.warn(
+      `[config] ${key} is ${value.length} chars; the MCP Registry rejects more than ${REGISTRY_TEXT_MAX}`,
+    );
+  }
+  return value;
+};
 
 // ARD (agenticresourcediscovery.org). The spec is young and inconsistent on
 // URN prefix (urn:ai vs urn:air) and media type — both overridable here so a
@@ -53,11 +76,11 @@ export const config = {
 
   // identity / branding
   name,
-  title: env("MCP_TITLE", "Sherah MCP Server"),
+  title: registryText("MCP_TITLE", "Sherah"),
   version: pkg.version, // single-sourced from package.json
-  description: env(
+  description: registryText(
     "MCP_DESCRIPTION",
-    "An MCP Server for integrating with and learning about Sherah.",
+    "Online personal assistant for busy parents: home, kids, meals, admin and more",
   ),
   websiteUrl: env("MCP_WEBSITE_URL"),
   repositoryUrl: env("MCP_REPOSITORY_URL"),

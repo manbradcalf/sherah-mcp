@@ -63,7 +63,7 @@ systemd, the `env` block in `ecosystem.config.cjs` for pm2).
 | `MCP_WEBSITE_URL` | (empty, omitted) | "Learn more" link (`serverInfo.websiteUrl`, card, root JSON) |
 | `MCP_REPOSITORY_URL` / `MCP_REPOSITORY_SOURCE` | (empty) / `github` | Card `repository` block |
 | `MCP_ICON_URL` / `MCP_ICON_MIME` | (empty) / `image/png` | Icon for `serverInfo.icons` and the card |
-| `MCP_CARD_NAME` | reverse-DNS of `PUBLIC_HOST` + `/$MCP_NAME` | Override the card's registry-style name |
+| `MCP_CARD_NAME` | reverse-DNS of `PUBLIC_HOST`'s apex domain + `/$MCP_NAME` (e.g. `com.example/name`) | Override the card's registry-style name. Set it explicitly for multi-label TLDs like `.co.uk`. Title and description must stay under 100 chars for the MCP Registry |
 | `MCP_INSTRUCTIONS` | composed from operator/contact/card URL | Override the `initialize` `instructions` text |
 
 The server **version** is single-sourced from `package.json` — bump it there.

@@ -9,7 +9,7 @@
 //   npm run smoke                          # against http://localhost:$PORT
 //   npm run smoke -- https://mcp.example.com
 const BASE = (
-  process.argv[2] ?? `http://localhost:${process.env.PORT ?? 3000}`
+  process.argv[2] ?? `http://localhost:${process.env.PORT ?? 8001}`
 ).replace(/\/$/, "");
 
 const results = [];
@@ -238,7 +238,7 @@ if (sessionId) {
     taskTypeCategories =
       JSON.parse(taskTypes.message?.result?.content?.[0]?.text ?? "{}")
         .categories ?? [];
-  } catch {}
+  } catch { }
   check(
     "get_available_task_types returns the task category JSON",
     taskTypes.res.status === 200 &&
