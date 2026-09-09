@@ -175,9 +175,9 @@ Registry entries are immutable per version. To republish after a change:
 1. Bump `version` in `package.json` (the registry `server.json` version must be
    new and should match).
 2. Sign a fresh timestamp with the key, exchange it at `/v0.1/auth/dns` for a
-   token, and `POST` the `server.json` to `/v0.1/publish`. The full script is in
-   [issue #22](https://github.com/manbradcalf/sherah-mcp/issues/22). Sign and
-   exchange in one go; the timestamp is only valid for 15 seconds.
+   token, and `POST` the `server.json` to `/v0.1/publish`. The full script is
+   `deploy/registry-publish.sh` (run with `VERSION=x.y.z`). It signs and
+   exchanges in one go; the timestamp is only valid for 15 seconds.
 3. `title` and `description` are capped at 100 characters. `src/config.ts`
    warns at startup if the defaults exceed that.
 

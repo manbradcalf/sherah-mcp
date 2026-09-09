@@ -99,8 +99,7 @@ is *not* a licence to render them into an email body.
 
 What protects the brand is now a contract with Xano rather than a property of
 the schema: the confirmation email must be fixed copy plus a tokenized link,
-with no submitted field interpolated into it. See issue #19 for where that text
-may and may not appear.
+with no submitted field interpolated into it. That contract is enforced on the Xano side.
 
 `scripts/smoke.mjs` pins the exact field set (`email`, `city`, `state`) with
 `additionalProperties: false`, and asserts `city` stays length-capped and
@@ -108,16 +107,12 @@ may and may not appear.
 silently widening the surface. That check bounds the schema; it can no longer
 prove the tool is text-free, because it isn't.
 
-**Volume aimed at one victim** — *not* closed here. Nothing in this repo limits
-how many times a given address can be submitted. The nginx limit
-(`deploy/nginx.conf.example`) keys on `$binary_remote_addr`, which is the wrong
-dimension: 10r/s pointed at a single mailbox sits entirely inside the budget,
-from one IP, and proxy rotation defeats per-IP keying anyway. The controls that
-actually bound it live in Xano — at most one pending unconfirmed request per
-address, and a resend cooldown per address so the millionth submission produces
-zero emails. **Until those exist in Xano, `request_sign_up` is an email-bombing
-primitive.** Treat the Xano-side checklist in issue #19 as a prerequisite for
-exposing it, not a follow-up.
+**Volume aimed at one address** — bounded in Xano, not here. The nginx limit
+(`deploy/nginx.conf.example`) is per source IP, which is an origin-load control,
+not a per-recipient one. The per-recipient controls live in Xano: at most one
+pending unconfirmed request per address, and a resend cooldown per address so
+repeat submissions for the same mailbox produce no additional email. Those
+controls are a prerequisite for exposing `request_sign_up`, not a follow-up.
 
 The tool's success message is also deliberately identical whether the address
 is new, already pending, or in cooldown — otherwise it becomes an oracle for
