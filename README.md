@@ -161,6 +161,28 @@ remote servers connect without an OAuth flow.
    includes a `limit_req` rate limit since the endpoint is anonymous.
 5. Verify end to end: `npm run smoke -- https://mcp.yourdomain.com`.
 
+## MCP Registry
+
+This server is published to the official MCP Registry as
+[`com.mysherah/sherah`](https://registry.modelcontextprotocol.io/v0.1/servers?search=com.mysherah),
+authenticated by an Ed25519 DNS TXT record at the apex of `mysherah.com`
+(`v=MCPv1; k=ed25519; p=...`). The private key lives in the maintainer's
+password manager and with Sherah's dev keys; it authorizes every
+`com.mysherah/*` name, so keep it out of the repo.
+
+Registry entries are immutable per version. To republish after a change:
+
+1. Bump `version` in `package.json` (the registry `server.json` version must be
+   new and should match).
+2. Sign a fresh timestamp with the key, exchange it at `/v0.1/auth/dns` for a
+   token, and `POST` the `server.json` to `/v0.1/publish`. The full script is in
+   [issue #22](https://github.com/manbradcalf/sherah-mcp/issues/22). Sign and
+   exchange in one go; the timestamp is only valid for 15 seconds.
+3. `title` and `description` are capped at 100 characters. `src/config.ts`
+   warns at startup if the defaults exceed that.
+
+If the key is ever rotated, remove the old TXT record or verification fails.
+
 ## Adding tools
 
 Tools live in `src/tools.ts`:
