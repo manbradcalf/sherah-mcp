@@ -1,4 +1,4 @@
-# /etc/nginx/sites-available/public-mcp-starter  (symlink into sites-enabled)
+# /etc/nginx/sites-available/sherah-mcp  (symlink into sites-enabled)
 #
 # The whole origin is proxied (location /) — NOT just /mcp — so the
 # discovery endpoints (/ and /.well-known/*) reach the app.
@@ -9,10 +9,10 @@ limit_req_zone $binary_remote_addr zone=mcp_public:10m rate=10r/s;
 
 server {
     listen 443 ssl;
-    server_name mcp.yourdomain.com;
+    server_name mcp.mysherah.com;
 
-    # ssl_certificate     /etc/letsencrypt/live/mcp.yourdomain.com/fullchain.pem;
-    # ssl_certificate_key /etc/letsencrypt/live/mcp.yourdomain.com/privkey.pem;
+    # ssl_certificate     /etc/letsencrypt/live/mcp.mysherah.com/fullchain.pem;
+    # ssl_certificate_key /etc/letsencrypt/live/mcp.mysherah.com/privkey.pem;
 
     location / {
         limit_req zone=mcp_public burst=20 nodelay;

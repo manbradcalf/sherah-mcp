@@ -1,5 +1,5 @@
 // config.ts — the ONLY place environment variables are read.
-// Rebranding a fork of this template means editing .env, not code.
+// Rebranding this server means editing .env, not code.
 import { createRequire } from "node:module";
 
 const require = createRequire(import.meta.url);
@@ -91,9 +91,9 @@ export const config = {
   contactEmail,
   cardName,
   cardNamespace: cardName.split("/")[0],
-  // Sign-up intake (Xano). No startup failure when the token is missing — a
-  // fresh fork must still boot and pass smoke tests — the tool instead
-  // rejects submissions until it is set.
+  // Sign-up intake (Xano). No startup failure when the token is missing — the
+  // server must still boot and pass smoke tests — the tool instead rejects
+  // submissions until it is set.
   signupWithTaskRequestEndpoint: env(
     "SHERAH_MCP_SIGNUP_URL",
     "https://api.mysherah.com/api:3xp2K03g/signup_with_task_requests",
