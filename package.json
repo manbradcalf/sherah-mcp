@@ -1,7 +1,7 @@
 {
-  "name": "public-mcp-starter",
+  "name": "sherah-mcp",
   "version": "0.1.0",
-  "description": "Starter template for fully public, no-auth MCP servers — a self-describing billboard endpoint discoverable by AI agents",
+  "description": "Sherah's public, no-auth MCP server — a self-describing billboard endpoint discoverable by AI agents",
   "type": "module",
   "scripts": {
     "build": "tsc",

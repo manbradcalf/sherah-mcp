@@ -1,5 +1,5 @@
 #!/usr/bin/env node
-// Smoke test for the public-mcp-starter template. Confirms:
+// Smoke test for the Sherah MCP server. Confirms:
 //   1. No endpoint requires authentication (zero credentials sent; any
 //      401/403 anywhere fails the run).
 //   2. Discovery documents exist and return real config-driven content.
@@ -7,7 +7,7 @@
 //
 // Usage:
 //   npm run smoke                          # against http://localhost:$PORT
-//   npm run smoke -- https://mcp.example.com
+//   npm run smoke -- https://mcp.mysherah.com
 const BASE = (
   process.argv[2] ?? `http://localhost:${process.env.PORT ?? 8001}`
 ).replace(/\/$/, "");
@@ -96,12 +96,6 @@ if (card.json) {
     remote?.type === "streamable-http" && remote?.url?.endsWith("/mcp"),
     `remote: ${JSON.stringify(remote)}`,
   );
-  const cardText = JSON.stringify(card.json);
-  if (cardText.includes("yourdomain.com") || cardText.includes("Your Company")) {
-    warnings.push(
-      "card still contains template placeholders (yourdomain.com / Your Company) — set the MCP_* env vars",
-    );
-  }
 }
 
 // ── 2. mcp.json alias ──────────────────────────────────────────────────
@@ -178,7 +172,7 @@ check(
   "initialize succeeds with no Authorization header",
   init.res.status === 200,
   init.res.status === 401 || init.res.status === 403
-    ? "ENDPOINT REQUIRES AUTH — this template must be public"
+    ? "ENDPOINT REQUIRES AUTH — this server must be public"
     : `status ${init.res.status}`,
 );
 const serverInfo = init.message?.result?.serverInfo;

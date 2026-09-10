@@ -1,6 +1,6 @@
-// server.ts — Public, no-auth remote MCP server (Streamable HTTP) for
-// deployment behind nginx. There is intentionally NO authentication in this
-// template: it is a discovery/billboard surface, not a private tool server.
+// server.ts — Sherah's public, no-auth remote MCP server (Streamable HTTP)
+// for deployment behind nginx. There is intentionally NO authentication
+// here: it is a discovery/billboard surface, not a private tool server.
 import express, { Request, Response } from "express";
 import { randomUUID } from "node:crypto";
 import { McpServer } from "@modelcontextprotocol/sdk/server/mcp.js";

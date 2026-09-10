@@ -2,7 +2,7 @@
 module.exports = {
   apps: [
     {
-      name: "public-mcp-starter",
+      name: "sherah-mcp",
       script: "build/server.js",
       instances: 1,
       env: {
