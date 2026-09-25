@@ -8,7 +8,7 @@
     "start": "node build/server.js",
     "dev": "tsx watch src/server.ts",
     "inspect-local": "PUBLIC_HOST=localhost PORT=3000 npm run dev",
-    "prod": "npm run build && PUBLIC_HOST=localhost PORT=3000 node --env-file=.env build/server.js",
+    "local-prod": "npm run build && PUBLIC_HOST=localhost PORT=3000 node --env-file=.env build/server.js",
     "smoke": "node scripts/smoke.mjs"
   },
   "dependencies": {
