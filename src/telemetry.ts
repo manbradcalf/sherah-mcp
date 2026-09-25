@@ -18,29 +18,37 @@ import { config } from "./config.js";
 // would log a failed dependency plus an exception on every start.
 const AZURE_METADATA_HOST = "169.254.169.254";
 
+// A bad connection string throws here, at import time. Telemetry is optional —
+// the server must still boot — so warn and run without it.
 if (config.appInsightsConnectionString) {
-  useAzureMonitor({
-    azureMonitorExporterOptions: {
-      connectionString: config.appInsightsConnectionString,
-    },
-    resource: resourceFromAttributes({ "service.name": config.name }),
-    enableLiveMetrics: true,
-    // Keep every request. The default rate limiter (5/sec) drops the first
-    // spans after startup, and Sherah's traffic is far below any limit.
-    tracesPerSecond: 0,
-    samplingRatio: 1,
-    instrumentationOptions: {
-      http: {
-        enabled: true, // replacing the http options drops the default
-        ignoreOutgoingRequestHook: (req: RequestOptions) =>
-          (req.hostname ?? req.host) === AZURE_METADATA_HOST,
-      } as object, // the distro types this as the base InstrumentationConfig
-    },
-  });
-  // systemd stops the service with SIGTERM; flush buffered spans first.
-  process.once("SIGTERM", () => {
-    shutdownAzureMonitor().finally(() => process.exit(0));
-  });
+  try {
+    useAzureMonitor({
+      azureMonitorExporterOptions: {
+        connectionString: config.appInsightsConnectionString,
+      },
+      resource: resourceFromAttributes({ "service.name": config.name }),
+      enableLiveMetrics: true,
+      // Keep every request. The default rate limiter (5/sec) drops the first
+      // spans after startup, and Sherah's traffic is far below any limit.
+      tracesPerSecond: 0,
+      samplingRatio: 1,
+      instrumentationOptions: {
+        http: {
+          enabled: true, // replacing the http options drops the default
+          ignoreOutgoingRequestHook: (req: RequestOptions) =>
+            (req.hostname ?? req.host) === AZURE_METADATA_HOST,
+        } as object, // the distro types this as the base InstrumentationConfig
+      },
+    });
+    // systemd stops the service with SIGTERM; flush buffered spans first.
+    process.once("SIGTERM", () => {
+      shutdownAzureMonitor().finally(() => process.exit(0));
+    });
+  } catch (err) {
+    console.warn(
+      `APPLICATIONINSIGHTS_CONNECTION_STRING rejected — telemetry off: ${(err as Error).message}`,
+    );
+  }
 }
 
 // Adds attributes to the current request span. No-op when telemetry is off.
