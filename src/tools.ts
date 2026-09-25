@@ -3,6 +3,7 @@ import z from "zod";
 import { US_STATE_CODES } from "./data/us-states.js";
 import { TASKS_WE_HELP_WITH } from "./data/tasks.js";
 import { config } from "./config.js";
+import { tagRequest } from "./telemetry.js";
 
 // Free-text fields on a public, unauthenticated tool are attacker-controlled:
 // `task` is whatever an LLM was told to write, and the caller is anonymous.
@@ -35,12 +36,22 @@ const textResult = (text: string) => ({
 // straight back to the caller, or null when Xano accepted the submission.
 // Callers are anonymous, so Xano's error detail stays in the server log — the
 // tool result never carries more than a status code.
+// Telemetry gets the outcome and state only — never email, city or task.
 async function postToIntake(
   toolName: string,
   url: string,
   submission: Record<string, unknown>,
 ): Promise<ReturnType<typeof errorResult> | null> {
+  const started = Date.now();
+  const tagOutcome = (outcome: string, xanoStatus?: number): void =>
+    tagRequest({
+      "signup.outcome": outcome,
+      "signup.state": String(submission.state),
+      ...(xanoStatus ? { "signup.xano_status": xanoStatus } : {}),
+      "signup.xano_ms": Date.now() - started,
+    });
   if (!config.xanoAuthToken) {
+    tagOutcome("not_configured");
     console.error(`${toolName} rejected: SHERAH_MCP_XANO_AUTH is not set`);
     return errorResult(
       "This server is not configured to accept sign-up requests yet. Please contact the operator.",
@@ -58,12 +69,21 @@ async function postToIntake(
       signal: AbortSignal.timeout(10_000),
     });
   } catch (err) {
+    tagOutcome("unreachable");
     console.error(`${toolName} Xano call failed:`, err);
     return errorResult(
       "Failed to submit sign-up request: the sign-up service is unreachable. Please try again later.",
     );
   }
   if (!response.ok) {
+    tagOutcome(
+      response.status === 409
+        ? "duplicate"
+        : response.status < 500
+          ? "rejected"
+          : "xano_error",
+      response.status,
+    );
     console.error(
       `${toolName} Xano error ${response.status}:`,
       await response.text(),
@@ -72,6 +92,7 @@ async function postToIntake(
       `Failed to submit sign-up request (sign-up service error ${response.status}). Please try again later.`,
     );
   }
+  tagOutcome("accepted", response.status);
   return null;
 }
 

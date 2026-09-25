@@ -35,8 +35,7 @@ requests
 | summarize count() by bin(timestamp, 1d), method
 | render timechart
 
-// --- Sign-up funnel: sessions that listed tools, and that called a sign-up tool.
-// Counts attempts: a tool call Xano rejects still returns HTTP 200.
+// --- Sign-up funnel: sessions that listed tools, tried a sign-up, and succeeded.
 requests
 | where timestamp > ago(30d)
 | extend session = tostring(customDimensions["mcp.session"]),
@@ -44,10 +43,12 @@ requests
          tool = tostring(customDimensions["mcp.tool"])
 | where isnotempty(session)
 | summarize listed_tools = countif(method == "tools/list") > 0,
-            signed_up = countif(tool startswith "request_sign_up") > 0,
+            tried = countif(tool startswith "request_sign_up") > 0,
+            accepted = countif(customDimensions["signup.outcome"] == "accepted") > 0,
             client = take_any(tostring(customDimensions["mcp.client"]))
             by session
-| summarize sessions = count(), listed = countif(listed_tools), signups = countif(signed_up) by client
+| summarize sessions = count(), listed = countif(listed_tools), tried = countif(tried),
+            accepted = countif(accepted) by client
 
 // --- Failed requests (HTTP 4xx/5xx)
 requests
@@ -56,14 +57,23 @@ requests
 | project timestamp, name, resultCode, client = tostring(customDimensions["mcp.client"]), url
 | order by timestamp desc
 
-// --- Xano calls (sign-up tools): volume, failures, latency
-dependencies
-| where timestamp > ago(7d)
-| where target has "mysherah.com"
-| summarize calls = count(), failed = countif(success == false),
-            p50_ms = percentile(duration, 50), p95_ms = percentile(duration, 95)
-            by bin(timestamp, 1d)
-| order by timestamp desc
+// --- Sign-up results: outcome per tool, with Xano latency.
+// Outcomes: accepted, duplicate (409), rejected (other 4xx), xano_error (5xx),
+// unreachable, not_configured. Payloads (email, city, task) are never logged.
+requests
+| where timestamp > ago(30d)
+| where isnotempty(customDimensions["signup.outcome"])
+| summarize count(), p95_xano_ms = percentile(toint(customDimensions["signup.xano_ms"]), 95)
+            by tool = tostring(customDimensions["mcp.tool"]),
+               outcome = tostring(customDimensions["signup.outcome"])
+| order by tool asc, count_ desc
+
+// --- Sign-ups by state
+requests
+| where timestamp > ago(30d)
+| where customDimensions["signup.outcome"] == "accepted"
+| summarize signups = count() by state = tostring(customDimensions["signup.state"])
+| order by signups desc
 
 // --- Discovery traffic: server card, robots.txt, etc.
 requests

@@ -8,7 +8,7 @@ The client name only arrives on `initialize`. To tag later requests with it, sto
 
 ## Constraints
 
-- Sherah stays where it is: a Vultr Ubuntu box, a systemd service running node, nginx in front. Nothing moves to a cloud provider. The backend is only a destination for data.
+- Sherah stays where it is: a Linux VPS, a systemd service running node, nginx in front. Nothing moves to a cloud provider. The backend is only a destination for data.
 - The start command must not change (no `node --import ...` / `--experimental-loader` flags).
 - Traffic is tiny, so any free tier covers volume.
 
@@ -121,8 +121,8 @@ Gotchas: the API key expires and returns 401 after (plan rotation). Live Tail se
 
 ## Open questions
 
-- Resolved: systemd unit `sherah-mcp` loads `/opt/sherah-mcp/.env` via `EnvironmentFile=`; `ExecStartPre` runs `npm run build`. `ecosystem.config.cjs` (pm2) is stale.
-- Resolved: Node v22.22.2 on the box.
+- Resolved: the systemd unit loads `.env` via `EnvironmentFile=` and builds in `ExecStartPre`. `ecosystem.config.cjs` (pm2) is stale.
+- Resolved: the server's Node version meets the 18.19+ requirement.
 - Outbound HTTPS from the box to whichever backend is picked.
 - Test that manual spans export without the loader hook before committing to an OTel option.
 

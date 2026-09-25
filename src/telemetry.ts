@@ -43,6 +43,11 @@ if (config.appInsightsConnectionString) {
   });
 }
 
+// Adds attributes to the current request span. No-op when telemetry is off.
+export function tagRequest(attributes: Record<string, string | number>): void {
+  trace.getActiveSpan()?.setAttributes(attributes);
+}
+
 // Clients choose these strings, so cap them before they become telemetry.
 const clip = (value: unknown): string | undefined =>
   typeof value === "string" ? value.slice(0, 100) : undefined;
