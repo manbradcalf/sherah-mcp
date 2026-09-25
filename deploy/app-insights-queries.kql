@@ -1,0 +1,83 @@
+// Application Insights queries for sherah-mcp.
+// Run in the portal: Application Insights resource -> Logs.
+// MCP details are in customDimensions: mcp.method, mcp.tool, mcp.client, mcp.session.
+// To drop local test runs, add: | where cloud_RoleInstance != "Mac"
+//   or: | where customDimensions["mcp.client"] != "smoke-test"
+
+// --- Every MCP request, newest first
+requests
+| where timestamp > ago(24h)
+| where isnotempty(customDimensions["mcp.method"])
+| project timestamp, name, client = tostring(customDimensions["mcp.client"]),
+          session = tostring(customDimensions["mcp.session"]), resultCode, duration
+| order by timestamp desc
+
+// --- Tool calls by tool and client, last 7 days
+requests
+| where timestamp > ago(7d)
+| where customDimensions["mcp.method"] == "tools/call"
+| summarize calls = count() by tool = tostring(customDimensions["mcp.tool"]),
+                               client = tostring(customDimensions["mcp.client"])
+| order by calls desc
+
+// --- Which AI clients connect (one initialize = one session)
+requests
+| where timestamp > ago(30d)
+| where customDimensions["mcp.method"] == "initialize"
+| summarize sessions = count() by client = tostring(customDimensions["mcp.client"])
+| order by sessions desc
+
+// --- Daily sessions and tool calls, as a chart
+requests
+| where timestamp > ago(30d)
+| extend method = tostring(customDimensions["mcp.method"])
+| where method in ("initialize", "tools/call")
+| summarize count() by bin(timestamp, 1d), method
+| render timechart
+
+// --- Sign-up funnel: sessions that listed tools, tried a sign-up, and succeeded.
+requests
+| where timestamp > ago(30d)
+| extend session = tostring(customDimensions["mcp.session"]),
+         method = tostring(customDimensions["mcp.method"]),
+         tool = tostring(customDimensions["mcp.tool"])
+| where isnotempty(session)
+| summarize listed_tools = countif(method == "tools/list") > 0,
+            tried = countif(tool startswith "request_sign_up") > 0,
+            accepted = countif(customDimensions["signup.outcome"] == "accepted") > 0,
+            client = take_any(tostring(customDimensions["mcp.client"]))
+            by session
+| summarize sessions = count(), listed = countif(listed_tools), tried = countif(tried),
+            accepted = countif(accepted) by client
+
+// --- Failed requests (HTTP 4xx/5xx)
+requests
+| where timestamp > ago(7d)
+| where toint(resultCode) >= 400
+| project timestamp, name, resultCode, client = tostring(customDimensions["mcp.client"]), url
+| order by timestamp desc
+
+// --- Sign-up results: outcome per tool, with Xano latency.
+// Outcomes: accepted, duplicate (409), rejected (other 4xx), xano_error (5xx),
+// unreachable, not_configured. Payloads (email, city, task) are never logged.
+requests
+| where timestamp > ago(30d)
+| where isnotempty(customDimensions["signup.outcome"])
+| summarize count(), p95_xano_ms = percentile(toint(customDimensions["signup.xano_ms"]), 95)
+            by tool = tostring(customDimensions["mcp.tool"]),
+               outcome = tostring(customDimensions["signup.outcome"])
+| order by tool asc, count_ desc
+
+// --- Sign-ups by state
+requests
+| where timestamp > ago(30d)
+| where customDimensions["signup.outcome"] == "accepted"
+| summarize signups = count() by state = tostring(customDimensions["signup.state"])
+| order by signups desc
+
+// --- Discovery traffic: server card, robots.txt, etc.
+requests
+| where timestamp > ago(7d)
+| where isempty(customDimensions["mcp.method"]) and name startswith "GET"
+| summarize hits = count() by url
+| order by hits desc
