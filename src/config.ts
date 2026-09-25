@@ -108,6 +108,8 @@ export const config = {
   xanoAuthToken: env("SHERAH_MCP_XANO_AUTH"),
   ardIdentifier,
   ardEntryType,
+  // Azure Application Insights. Empty = telemetry off.
+  appInsightsConnectionString: env("APPLICATIONINSIGHTS_CONNECTION_STRING"),
   instructions: env(
     "MCP_INSTRUCTIONS",
     `This is a fully public MCP server operated by ${operator}. It's purpose is to educate AI agents of ${operator}'s capabilities, exposing an endpoint to request a task and signup if interested.` +

@@ -1,6 +1,7 @@
 // server.ts — Sherah's public, no-auth remote MCP server (Streamable HTTP)
 // for deployment behind nginx. There is intentionally NO authentication
 // here: it is a discovery/billboard surface, not a private tool server.
+import { mcpTracing } from "./telemetry.js"; // first: registers the telemetry SDK
 import express, { Request, Response } from "express";
 import { randomUUID } from "node:crypto";
 import { McpServer } from "@modelcontextprotocol/sdk/server/mcp.js";
@@ -21,6 +22,7 @@ import {
 interface Session {
   server: McpServer;
   transport: StreamableHTTPServerTransport;
+  client?: string; // clientInfo.name from initialize, for telemetry
 }
 
 // This map enables multiple clients to use the server at once
@@ -30,6 +32,7 @@ const transports = new Map<string, Session>();
 
 const app = express();
 app.use(express.json());
+app.use("/mcp", mcpTracing((id) => (id ? transports.get(id)?.client : undefined)));
 
 // CORS before host validation so even rejections are readable from browsers.
 app.use(publicCors);
@@ -92,7 +95,11 @@ async function handleConnection(req: Request, res: Response): Promise<void> {
       const transport = new StreamableHTTPServerTransport({
         sessionIdGenerator: () => randomUUID(),
         onsessioninitialized: (id: string) => {
-          transports.set(id, { server, transport });
+          transports.set(id, {
+            server,
+            transport,
+            client: req.body.params?.clientInfo?.name,
+          });
         },
       });
       transport.onclose = () => {
